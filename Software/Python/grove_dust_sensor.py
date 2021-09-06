@@ -38,7 +38,7 @@ THE SOFTWARE.
 # Connect the dust sensor to Port D2 on the GrovePi. The dust sensor only works on that port
 # The dust sensor takes 30 seconds to update the new values
 #
-# It returns the LPO time, the percentage (LPO time divided by total period, in this case being 30000 ms) 
+# It returns the LPO time, the percentage (LPO time divided by total period, in this case being 30000 ms)
 # and the concentration in pcs/0.01cf
 
 import time
@@ -46,8 +46,9 @@ import grovepi
 
 print("Reading from the Grove Dust Sensor")
 
+period = 10000
 # default pin is 2 and default update period is 30000 ms
-grovepi.dust_sensor_en()
+grovepi.dust_sensor_en(2, period)
 
 time_to_run = 125 # 10 seconds
 start = time.time() # current time in seconds
@@ -57,9 +58,10 @@ while start + time_to_run > time.time():
 
 	# defaults to pin 2
 	new_val = grovepi.dust_sensor_read()
-	if old_val[0] != new_val[0]:
-		print("LPO time = {:3d} | LPO% = {:5.2f} | pcs/0.01cf = {:6.1f}".format(*new_val))
-		old_val = new_val
+	# if old_val[0] != new_val[0]:
+	print("LPO time = {:3d} | LPO% = {:5.2f} | pcs/0.01cf = {:6.1f}".format(*new_val))
+	# old_val = new_val
+	time.sleep(period / 1000)
 
 # and disable the interrupt on pin 2
 grovepi.dust_sensor_dis()
