@@ -54,7 +54,7 @@ time_to_run = 125 # 10 seconds
 start = time.time() # current time in seconds
 old_val = [0, 0.0, 0.0]
 
-while start + time_to_run > time.time():
+while True:
 
 	# defaults to pin 2
 	new_val = grovepi.dust_sensor_read()
