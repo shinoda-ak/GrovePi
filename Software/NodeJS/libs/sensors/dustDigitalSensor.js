@@ -1,30 +1,31 @@
 // TODO: call disable function on exit
-var DigitalSensor = require('./base/digitalSensor')
-var commands = require('../commands')
-var helpers = require('./helpers')
+const DigitalSensor = require('./base/digitalSensor')
+const commands = require('../commands')
+const helpers = require('./helpers')
 
-function DustDigitalSensor(pin) {
+function DustDigitalSensor (pin) {
   DigitalSensor.apply(this, Array.prototype.slice.call(arguments))
-  this.results = new Array()
+  this.results = []
 }
 DustDigitalSensor.prototype = new DigitalSensor()
 
 DustDigitalSensor.prototype.read = function () {
-  var write = this.board.writeBytes(commands.dustSensorRead.concat([this.pin, commands.unused, commands.unused]))
+  const write = this.board.writeBytes(commands.dustSensorRead.concat([this.pin, commands.unused, commands.unused]))
   if (write) {
     this.board.wait(200)
-    var bytes = this.board.readBytes()
-    //console.log(bytes[0] + ' ' + bytes[1] + ' ' + bytes[2] + ' ' + bytes[3])
-    if (bytes instanceof Buffer && bytes[0] != 0)
+    const bytes = this.board.readBytes()
+    // console.log(bytes[0] + ' ' + bytes[1] + ' ' + bytes[2] + ' ' + bytes[3])
+    if (bytes instanceof Buffer && bytes[0] !== 0) {
       return [bytes[0], (bytes[3] * 256 * 256 + bytes[2] * 256 + bytes[1])]
-    else
+    } else {
       return false
+    }
   } else {
     return false
   }
 }
 DustDigitalSensor.prototype.enable = function () {
-  var write = this.board.writeBytes(commands.dustSensorEn.concat([commands.unused, commands.unused, commands.unused]))
+  const write = this.board.writeBytes(commands.dustSensorEn.concat([commands.unused, commands.unused, commands.unused]))
   if (write) {
     this.board.wait(200)
     return true
@@ -33,7 +34,7 @@ DustDigitalSensor.prototype.enable = function () {
   }
 }
 DustDigitalSensor.prototype.disable = function () {
-  var write = this.board.writeBytes(commands.dustSensorDis.concat([commands.unused, commands.unused, commands.unused]))
+  const write = this.board.writeBytes(commands.dustSensorDis.concat([commands.unused, commands.unused, commands.unused]))
   if (write) {
     this.board.wait(200)
     return true
@@ -43,43 +44,43 @@ DustDigitalSensor.prototype.disable = function () {
 }
 
 DustDigitalSensor.prototype.start = function () {
-    if (!this.enable())
-        throw new Error('cannot enable dust sensor')
-    this.enable()
-    setInterval(loop.bind(this), 30 * 1000) //every 30 seconds
+  if (!this.enable()) { throw new Error('cannot enable dust sensor') }
+  this.enable()
+  setInterval(loop.bind(this), 30 * 1000) // every 30 seconds
 }
 
 DustDigitalSensor.prototype.stop = function () {
-    this.disable()
-    clearInterval(loop)
+  this.disable()
+  clearInterval(loop)
 }
 
-function loop() {
-    let currentResult = this.read()
-    this.results.push(currentResult[1])
+function loop () {
+  const currentResult = this.read()
+  this.results.push(currentResult[1])
 }
 
 DustDigitalSensor.prototype.readAvgMax = function () {
-
-    if (this.results.length === 0) return {
-        avg: helpers.NOT_AVAILABLE,
-        max: helpers.NOT_AVAILABLE
-    };
-
-    let sum = this.results.reduce((acc, cur) => acc + cur, 0)
-    let avg = sum / this.results.length
-
-    let max = this.results.reduce(function (a, b) {
-        return Math.max(a, b)
-    });
-
-    //reset the array
-    this.results = new Array()
-
+  if (this.results.length === 0) {
     return {
-        avg: helpers.round(avg, 2),
-        max: helpers.round(max, 2)
-    };
+      avg: helpers.NOT_AVAILABLE,
+      max: helpers.NOT_AVAILABLE
+    }
+  }
+
+  const sum = this.results.reduce((acc, cur) => acc + cur, 0)
+  const avg = sum / this.results.length
+
+  const max = this.results.reduce(function (a, b) {
+    return Math.max(a, b)
+  })
+
+  // reset the array
+  this.results = []
+
+  return {
+    avg: helpers.round(avg, 2),
+    max: helpers.round(max, 2)
+  }
 }
 
 module.exports = DustDigitalSensor

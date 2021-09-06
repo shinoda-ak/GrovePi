@@ -46,7 +46,7 @@ import grovepi
 
 print("Reading from the Grove Dust Sensor")
 
-period = 10000
+period = 30000
 # default pin is 2 and default update period is 30000 ms
 grovepi.dust_sensor_en(2, period)
 
