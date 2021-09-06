@@ -233,13 +233,14 @@ def read_i2c_block(no_bytes = max_recv_size):
 		except:
 			counter += 1
 			time.sleep(0.003)
-			
+
 	return data
 
 def read_identified_i2c_block(read_command_id, no_bytes):
 	data = [-1]
 	while data[0] != read_command_id[0]:
 		data = read_i2c_block(no_bytes + 1)
+		print(data)
 
 	return data[1:]
 
